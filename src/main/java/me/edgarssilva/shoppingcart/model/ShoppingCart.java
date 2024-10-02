@@ -7,48 +7,40 @@ import lombok.Setter;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Getter
 @Setter
 @NoArgsConstructor
 public class ShoppingCart {
     private Long id;
-    private Map<Long, Item> items = new ConcurrentHashMap<>();
-    private final AtomicLong itemIds = new AtomicLong(0);
+    private Map<Long, CartEntry> entries = new ConcurrentHashMap<>();
 
     public ShoppingCart(Long id) {
         this.id = id;
     }
 
-    public void clear() {
-        items.clear();
-    }
-
-    public double getTotal() {
-        return items.values().stream().mapToDouble(i -> i.getPrice() * i.getQuantity()).sum();
-    }
-
-    public void addItem(Item item) {
-        items.merge(item.getId(), item, (existingItem, newItem) -> {
-            existingItem.addQuantity(existingItem.getQuantity() + newItem.getQuantity());
-            return existingItem;
+    public void addItem(CartEntry entry) {
+        entries.merge(entry.getItemId(), entry, (o, n) -> {
+            o.setQuantity(o.getQuantity() + n.getQuantity());
+            return o;
         });
     }
 
-    public Optional<Item> getItem(Long itemId) {
-        return Optional.ofNullable(items.get(itemId));
+    public Optional<CartEntry> getItem(Long itemId) {
+        return Optional.ofNullable(entries.get(itemId));
     }
 
-    public Optional<Item> updateItem(Long itemId, Item item) {
-        if (!items.containsKey(itemId)) return Optional.empty();
-
-        item.setId(itemId);
-        items.put(itemId, item);
-        return Optional.of(item);
+    public boolean removeItem(Long itemId) {
+        return entries.remove(itemId) != null;
     }
 
-    public boolean deleteItem(Long itemId) {
-        return items.remove(itemId) != null;
+    public boolean updateItem(CartEntry item) {
+        if (!entries.containsKey(item.getItemId())) return false;
+        entries.put(item.getItemId(), item);
+        return true;
+    }
+
+    public void clear() {
+        entries.clear();
     }
 }

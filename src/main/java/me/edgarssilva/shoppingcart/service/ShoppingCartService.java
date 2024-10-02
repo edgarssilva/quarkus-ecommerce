@@ -1,13 +1,13 @@
 package me.edgarssilva.shoppingcart.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import me.edgarssilva.shoppingcart.model.Item;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
+import me.edgarssilva.shoppingcart.model.CartEntry;
 import me.edgarssilva.shoppingcart.model.ShoppingCart;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -16,8 +16,11 @@ public class ShoppingCartService {
     private final Map<Long, ShoppingCart> carts = new ConcurrentHashMap<>();
     private final AtomicLong cartIds = new AtomicLong();
 
+    @Inject
+    ItemService itemService;
+
     public List<ShoppingCart> getAllCarts() {
-        return new ArrayList<>(carts.values());
+        return List.copyOf(carts.values());
     }
 
     public ShoppingCart createCart() {
@@ -26,35 +29,51 @@ public class ShoppingCartService {
         return cart;
     }
 
-    public Optional<ShoppingCart> getCart(Long cartId) {
-        return Optional.ofNullable(carts.get(cartId));
+    public ShoppingCart getCart(Long cartId) {
+        return Optional.ofNullable(carts.get(cartId))
+                .orElseThrow(() -> new WebApplicationException("Cart ID " + cartId + " not found!", Response.Status.NOT_FOUND));
     }
 
-    public boolean addItem(Long cartId, Long itemId, int quantity) {
-        return getCart(cartId).flatMap(cart -> cart.getItem(itemId).map(item -> {
-            item.setQuantity(quantity);
-            cart.addItem(item);
-            return true;
-        })).orElse(false);
+    public void addCartItem(Long cartId, CartEntry entry) {
+        if (!itemService.itemExists(entry.getItemId()))
+            throw new WebApplicationException("ID " + entry.getItemId() + "is not a valid item! ", Response.Status.BAD_REQUEST);
+
+        getCart(cartId).addItem(entry);
     }
 
-    public boolean updateItem(Long cartId, Item item) {
-        return getCart(cartId).flatMap(cart -> cart.updateItem(item.getId(), item)).isPresent();
+    public Collection<CartEntry> getCartItems(Long cartId) {
+        return getCart(cartId).getEntries().values();
     }
 
-    public void clearCart(Long cartId) {
-        getCart(cartId).ifPresent(ShoppingCart::clear);
+    public CartEntry getCartItem(Long cartId, Long itemId) {
+        return getCart(cartId).getItem(itemId)
+                .orElseThrow(() -> new WebApplicationException("Item ID " + itemId + " not found in cart!" + cartId, Response.Status.NOT_FOUND));
     }
+
+    public void updateCartItem(Long cartId, CartEntry entry) {
+        if (!itemService.itemExists(entry.getItemId()))
+            throw new WebApplicationException("ID " + entry.getItemId() + "is not a valid item!", Response.Status.BAD_REQUEST);
+
+        if (!getCart(cartId).updateItem(entry))
+            throw new WebApplicationException("Item ID " + entry.getItemId() + " not found in cart!" + cartId, Response.Status.NOT_FOUND);
+    }
+
 
     public boolean isCartEmpty(Long cartId) {
-        return getCart(cartId).map(cart -> cart.getItems().isEmpty()).orElse(true);
+        return getCart(cartId).getEntries().isEmpty();
     }
 
-    public boolean removeItem(Long cartId, Long itemId) {
-        return getCart(cartId).map(cart -> cart.deleteItem(itemId)).orElse(false);
+    public void removeCartItem(Long cartId, Long itemId) {
+        if (!getCart(cartId).removeItem(itemId))
+            throw new WebApplicationException("Item ID " + itemId + " not found in cart!" + cartId, Response.Status.NOT_FOUND);
     }
 
-    public boolean deleteCart(Long cartId) {
-        return carts.remove(cartId) != null;
+    public void clearCartItems(Long cartId) {
+        getCart(cartId).clear();
+    }
+
+    public void deleteCart(Long cartId) {
+        if (carts.remove(cartId) == null)
+            throw new WebApplicationException("Cart ID " + cartId + " not found!", Response.Status.NOT_FOUND);
     }
 }
