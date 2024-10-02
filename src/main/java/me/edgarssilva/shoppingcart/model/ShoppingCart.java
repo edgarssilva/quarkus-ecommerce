@@ -21,17 +21,6 @@ public class ShoppingCart {
         this.id = id;
     }
 
-    public void addItem(Item item) {
-        items.merge(item.getId(), item, (existingItem, newItem) -> {
-            existingItem.addQuantity(existingItem.getQuantity() + newItem.getQuantity());
-            return existingItem;
-        });
-    }
-
-    public void removeItem(Long id) {
-        items.remove(id);
-    }
-
     public void clear() {
         items.clear();
     }
@@ -40,10 +29,11 @@ public class ShoppingCart {
         return items.values().stream().mapToDouble(i -> i.getPrice() * i.getQuantity()).sum();
     }
 
-    public Item createItem(Item item) {
-        item.setId(itemIds.incrementAndGet());
-        items.put(item.getId(), item);
-        return item;
+    public void addItem(Item item) {
+        items.merge(item.getId(), item, (existingItem, newItem) -> {
+            existingItem.addQuantity(existingItem.getQuantity() + newItem.getQuantity());
+            return existingItem;
+        });
     }
 
     public Optional<Item> getItem(Long itemId) {
