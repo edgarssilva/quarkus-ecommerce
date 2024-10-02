@@ -34,15 +34,22 @@ public class ShoppingCartService {
                 .orElseThrow(() -> new WebApplicationException("Cart ID " + cartId + " not found!", Response.Status.NOT_FOUND));
     }
 
-    public void addCartItem(Long cartId, CartEntry entry) {
+    private void validateCartItem(CartEntry entry) {
         if (!itemService.itemExists(entry.getItemId()))
-            throw new WebApplicationException("ID " + entry.getItemId() + "is not a valid item! ", Response.Status.BAD_REQUEST);
+            throw new WebApplicationException("ID " + entry.getItemId() + " is not a valid item! ", Response.Status.BAD_REQUEST);
+
+        if (entry.getQuantity() <= 0)
+            throw new WebApplicationException("Item quantity must be greater than 0!", Response.Status.BAD_REQUEST);
+    }
+
+    public void addCartItem(Long cartId, CartEntry entry) {
+        validateCartItem(entry);
 
         getCart(cartId).addItem(entry);
     }
 
     public Collection<CartEntry> getCartItems(Long cartId) {
-        return getCart(cartId).getEntries().values();
+        return getCart(cartId).getItems();
     }
 
     public CartEntry getCartItem(Long cartId, Long itemId) {
@@ -51,8 +58,7 @@ public class ShoppingCartService {
     }
 
     public void updateCartItem(Long cartId, CartEntry entry) {
-        if (!itemService.itemExists(entry.getItemId()))
-            throw new WebApplicationException("ID " + entry.getItemId() + "is not a valid item!", Response.Status.BAD_REQUEST);
+        validateCartItem(entry);
 
         if (!getCart(cartId).updateItem(entry))
             throw new WebApplicationException("Item ID " + entry.getItemId() + " not found in cart!" + cartId, Response.Status.NOT_FOUND);
@@ -60,7 +66,7 @@ public class ShoppingCartService {
 
 
     public boolean isCartEmpty(Long cartId) {
-        return getCart(cartId).getEntries().isEmpty();
+        return getCart(cartId).isEmpty();
     }
 
     public void removeCartItem(Long cartId, Long itemId) {

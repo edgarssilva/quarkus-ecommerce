@@ -17,6 +17,9 @@ public class ItemService {
     private final AtomicLong itemIds = new AtomicLong();
 
     public void addItem(Item item) {
+        if (item.getPrice() <= 0)
+            throw new WebApplicationException("Item price must be greater than 0!", Response.Status.BAD_REQUEST);
+
         Long id = itemIds.incrementAndGet();
         item.setId(id);
         items.put(id, item);

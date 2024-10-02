@@ -9,8 +9,6 @@ import jakarta.ws.rs.ext.Provider;
 
 @Provider
 public class WebExceptionMapper implements ExceptionMapper<WebApplicationException> {
-    private record ErrorResponse(String message) {
-    }
 
     @Override
     public Response toResponse(WebApplicationException exception) {

@@ -53,7 +53,7 @@ public class ShoppingCartResource {
     @Path("/{cartId}/items")
     public Response addItem(@PathParam("cartId") Long cartId, CartEntry entry) {
         service.addCartItem(cartId, entry);
-        return Response.status(Response.Status.CREATED).entity(entry).build();
+        return Response.status(Response.Status.CREATED).build();
     }
 
     @PUT

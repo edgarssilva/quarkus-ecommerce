@@ -4,14 +4,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Getter
 @Setter
 @NoArgsConstructor
 public class ShoppingCart {
+    @Getter
     private Long id;
     private Map<Long, CartEntry> entries = new ConcurrentHashMap<>();
 
@@ -26,6 +27,10 @@ public class ShoppingCart {
         });
     }
 
+    public List<CartEntry> getItems() {
+        return List.copyOf(entries.values());
+    }
+
     public Optional<CartEntry> getItem(Long itemId) {
         return Optional.ofNullable(entries.get(itemId));
     }
@@ -38,6 +43,10 @@ public class ShoppingCart {
         if (!entries.containsKey(item.getItemId())) return false;
         entries.put(item.getItemId(), item);
         return true;
+    }
+
+    public boolean isEmpty() {
+        return entries.isEmpty();
     }
 
     public void clear() {
