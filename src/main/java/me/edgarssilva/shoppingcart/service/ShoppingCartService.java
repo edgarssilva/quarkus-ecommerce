@@ -5,6 +5,8 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import me.edgarssilva.shoppingcart.model.CartEntry;
+import me.edgarssilva.shoppingcart.model.CheckoutDetails;
+import me.edgarssilva.shoppingcart.model.Item;
 import me.edgarssilva.shoppingcart.model.ShoppingCart;
 
 import java.util.*;
@@ -36,7 +38,7 @@ public class ShoppingCartService {
 
     private void validateCartItem(CartEntry entry) {
         if (!itemService.itemExists(entry.getItemId()))
-            throw new WebApplicationException("ID " + entry.getItemId() + " is not a valid item! ", Response.Status.BAD_REQUEST);
+            throw new WebApplicationException("ID " + entry.getItemId() + " is not a valid item!", Response.Status.BAD_REQUEST);
 
         if (entry.getQuantity() <= 0)
             throw new WebApplicationException("Item quantity must be greater than 0!", Response.Status.BAD_REQUEST);
@@ -65,13 +67,27 @@ public class ShoppingCartService {
     }
 
 
-    public boolean isCartEmpty(Long cartId) {
-        return getCart(cartId).isEmpty();
-    }
-
     public void removeCartItem(Long cartId, Long itemId) {
         if (!getCart(cartId).removeItem(itemId))
             throw new WebApplicationException("Item ID " + itemId + " not found in cart!" + cartId, Response.Status.NOT_FOUND);
+    }
+
+    public CheckoutDetails checkout(Long cartId) {
+        ShoppingCart cart = getCart(cartId);
+        if (cart.isEmpty())
+            throw new WebApplicationException("Cart is empty!", Response.Status.BAD_REQUEST);
+
+        List<CheckoutDetails.ItemCost> costs = new ArrayList<>();
+        double total = 0;
+
+        for (CartEntry entry : cart.getItems()) {
+            Item item = itemService.getItem(entry.getItemId());
+            double itemTotal = item.getPrice() * entry.getQuantity();
+            costs.add(new CheckoutDetails.ItemCost(item.getName(), item.getPrice(), entry.getQuantity(), itemTotal));
+            total += itemTotal;
+        }
+
+        return new CheckoutDetails(costs, total);
     }
 
     public void clearCartItems(Long cartId) {
