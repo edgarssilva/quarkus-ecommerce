@@ -9,6 +9,7 @@ import me.edgarssilva.shoppingcart.model.CheckoutDetails;
 import me.edgarssilva.shoppingcart.model.ShoppingCart;
 import me.edgarssilva.shoppingcart.service.ShoppingCartService;
 import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
@@ -21,7 +22,7 @@ public class ShoppingCartResource {
 
     @GET
     @Operation(summary = "Get all shopping carts")
-    @APIResponse(responseCode = "200", description = "List of shopping carts", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ShoppingCart.class)))
+    @APIResponse(responseCode = "200", description = "List of shopping carts", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ShoppingCart.class, type = SchemaType.ARRAY)))
     public Response getAllCarts() {
         return Response.ok(service.getAllCarts()).build();
     }
@@ -56,7 +57,7 @@ public class ShoppingCartResource {
     @GET
     @Path("/{cartId}/items")
     @Operation(summary = "Get all items in a shopping cart")
-    @APIResponse(responseCode = "200", description = "List of cart items", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CartEntry.class)))
+    @APIResponse(responseCode = "200", description = "List of cart items", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CartEntry.class, type = SchemaType.ARRAY)))
     @APIResponse(responseCode = "404", description = "Cart not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
     public Response getCartItems(@PathParam("cartId") Long cartId) {
         return Response.ok(service.getCartItems(cartId)).build();

@@ -1,5 +1,6 @@
 package me.edgarssilva.shoppingcart.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,10 +11,12 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Setter
+@Getter
 @NoArgsConstructor
 public class ShoppingCart {
-    @Getter
     private Long id;
+
+    @JsonIgnore
     private Map<Long, CartEntry> entries = new ConcurrentHashMap<>();
 
     public ShoppingCart(Long id) {

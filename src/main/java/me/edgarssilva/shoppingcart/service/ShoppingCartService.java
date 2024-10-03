@@ -50,7 +50,7 @@ public class ShoppingCartService {
         getCart(cartId).addItem(entry);
     }
 
-    public Collection<CartEntry> getCartItems(Long cartId) {
+    public List<CartEntry> getCartItems(Long cartId) {
         return getCart(cartId).getItems();
     }
 
