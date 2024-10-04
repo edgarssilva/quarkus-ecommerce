@@ -18,7 +18,7 @@ Also for simplicity, I've added the file `kubernetes.yaml` to the root of the pr
 
 ### Items
 
-I was not sure if the items were meant to be created inside, but I've assumed that they are created outside the cart, and only add the quantity to the cart. 
+I was not sure if the items were meant to be created inside the cart, but I've assumed that they are created outside the cart, and only add the quantity to the cart. 
 
 ### Checkout
 
