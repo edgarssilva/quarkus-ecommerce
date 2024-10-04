@@ -1,0 +1,490 @@
+---
+openapi: 3.0.3
+info:
+  title: Shopping Cart API
+  description: Simple shopping cart API for altice labs exercise
+  version: 1.0.0
+paths:
+  /api/analytics:
+    get:
+      tags:
+      - Analytics Resource
+      summary: Get key performance indicators (KPIs)
+      responses:
+        "200":
+          description: Retrieves key performance indicators (KPIs) for shopping carts.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KpiMetrics"
+  /api/items:
+    get:
+      tags:
+      - Item Resource
+      summary: Get all items
+      responses:
+        "200":
+          description: List of items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Item"
+    post:
+      tags:
+      - Item Resource
+      summary: Add a new item
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Item"
+      responses:
+        "201":
+          description: Item added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+  /api/items/{itemId}:
+    get:
+      tags:
+      - Item Resource
+      summary: Get an item by ID
+      parameters:
+      - name: itemId
+        in: path
+        required: true
+        schema:
+          format: int64
+          type: integer
+      responses:
+        "200":
+          description: Item details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+        "404":
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      tags:
+      - Item Resource
+      summary: Update an item by ID
+      parameters:
+      - name: itemId
+        in: path
+        required: true
+        schema:
+          format: int64
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Item"
+      responses:
+        "200":
+          description: Item updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+        "404":
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      tags:
+      - Item Resource
+      summary: Delete an item by ID
+      parameters:
+      - name: itemId
+        in: path
+        required: true
+        schema:
+          format: int64
+          type: integer
+      responses:
+        "204":
+          description: Item deleted
+        "404":
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/readiness:
+    get:
+      tags:
+      - Readiness Resource
+      summary: Readiness check
+      responses:
+        "200":
+          description: Check if the application is ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReadinessResponse"
+  /api/shopping-carts:
+    get:
+      tags:
+      - Shopping Cart Resource
+      summary: Get all shopping carts
+      responses:
+        "200":
+          description: List of shopping carts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ShoppingCart"
+    post:
+      tags:
+      - Shopping Cart Resource
+      summary: Create a new shopping cart
+      responses:
+        "201":
+          description: Shopping cart created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShoppingCart"
+  /api/shopping-carts/{cartId}:
+    get:
+      tags:
+      - Shopping Cart Resource
+      summary: Get a shopping cart by ID
+      parameters:
+      - name: cartId
+        in: path
+        required: true
+        schema:
+          format: int64
+          type: integer
+      responses:
+        "200":
+          description: Shopping cart details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShoppingCart"
+        "404":
+          description: Cart not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      tags:
+      - Shopping Cart Resource
+      summary: Delete a shopping cart by ID
+      parameters:
+      - name: cartId
+        in: path
+        required: true
+        schema:
+          format: int64
+          type: integer
+      responses:
+        "204":
+          description: Shopping cart deleted
+        "404":
+          description: Cart not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/shopping-carts/{cartId}/checkout:
+    post:
+      tags:
+      - Shopping Cart Resource
+      summary: Checkout a shopping cart
+      parameters:
+      - name: cartId
+        in: path
+        required: true
+        schema:
+          format: int64
+          type: integer
+      responses:
+        "200":
+          description: Cart details with total price of the items and the cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutDetails"
+        "400":
+          description: Cart is empty
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/shopping-carts/{cartId}/clear:
+    post:
+      tags:
+      - Shopping Cart Resource
+      summary: Clear all items in a shopping cart
+      parameters:
+      - name: cartId
+        in: path
+        required: true
+        schema:
+          format: int64
+          type: integer
+      responses:
+        "200":
+          description: Cart cleared
+        "404":
+          description: Cart not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/shopping-carts/{cartId}/items:
+    get:
+      tags:
+      - Shopping Cart Resource
+      summary: Get all items in a shopping cart
+      parameters:
+      - name: cartId
+        in: path
+        required: true
+        schema:
+          format: int64
+          type: integer
+      responses:
+        "200":
+          description: List of cart items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CartEntry"
+        "404":
+          description: Cart not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      tags:
+      - Shopping Cart Resource
+      summary: Update an item in a shopping cart
+      parameters:
+      - name: cartId
+        in: path
+        required: true
+        schema:
+          format: int64
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CartEntry"
+      responses:
+        "200":
+          description: Item updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CartEntry"
+        "404":
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      tags:
+      - Shopping Cart Resource
+      summary: Add an item to a shopping cart
+      parameters:
+      - name: cartId
+        in: path
+        required: true
+        schema:
+          format: int64
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CartEntry"
+      responses:
+        "201":
+          description: Item added to cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CartEntry"
+        "404":
+          description: Cart not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/shopping-carts/{cartId}/items/{itemId}:
+    get:
+      tags:
+      - Shopping Cart Resource
+      summary: Get an item in a shopping cart by ID
+      parameters:
+      - name: cartId
+        in: path
+        required: true
+        schema:
+          format: int64
+          type: integer
+      - name: itemId
+        in: path
+        required: true
+        schema:
+          format: int64
+          type: integer
+      responses:
+        "200":
+          description: Cart item details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CartEntry"
+        "404":
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      tags:
+      - Shopping Cart Resource
+      summary: Remove an item from a shopping cart
+      parameters:
+      - name: cartId
+        in: path
+        required: true
+        schema:
+          format: int64
+          type: integer
+      - name: itemId
+        in: path
+        required: true
+        schema:
+          format: int64
+          type: integer
+      responses:
+        "204":
+          description: Item removed from cart
+        "404":
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    CartEntry:
+      type: object
+      properties:
+        itemId:
+          format: int64
+          type: integer
+        quantity:
+          format: int32
+          type: integer
+    CheckoutDetails:
+      type: object
+      properties:
+        costs:
+          type: array
+          items:
+            $ref: "#/components/schemas/ItemCost"
+        total:
+          format: double
+          type: number
+    ErrorResponse:
+      description: Error response
+      type: object
+      properties:
+        message:
+          type: string
+    Item:
+      type: object
+      properties:
+        id:
+          format: int64
+          type: integer
+        name:
+          type: string
+        price:
+          format: double
+          type: number
+    ItemCost:
+      type: object
+      properties:
+        name:
+          type: string
+        price:
+          format: double
+          type: number
+        quantity:
+          format: int32
+          type: integer
+        total:
+          format: double
+          type: number
+    KpiMetrics:
+      type: object
+      properties:
+        cartsWithItems:
+          format: int64
+          type: integer
+        maxItemsInCart:
+          format: int32
+          type: integer
+        avgItemsInCart:
+          format: double
+          type: number
+        minItemsInCart:
+          format: int32
+          type: integer
+        topItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/TopItem"
+    ReadinessResponse:
+      type: object
+      properties:
+        result:
+          type: string
+    ShoppingCart:
+      type: object
+      properties:
+        id:
+          format: int64
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CartEntry"
+        empty:
+          type: boolean
+    TopItem:
+      type: object
+      properties:
+        itemId:
+          format: int64
+          type: integer
+        quantity:
+          format: int32
+          type: integer
